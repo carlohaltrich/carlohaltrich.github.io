@@ -133,7 +133,7 @@
     </div>
     <div>
       <video muted loop playsinline preload="metadata" src="videos/content/b1-right.mp4"></video>
-      <button class="vid-btn" data-video="https://pub-d0914c454d6f473e86b4046a2477c2ae.r2.dev/GO eBike Short Intro LS.mp4">Swytch Bike</button>
+      <button class="vid-btn" data-video="https://www.youtube.com/watch?v=VIDEO_ID">project two</button>
     </div>
   </section>
 
@@ -306,6 +306,23 @@
       return link;
     }
 
+    // Direct video files (e.g. .mp4 on Cloudflare R2) play in a plain video element, driven by the same control bar
+    const isFile = link => /\.(mp4|webm|mov|m4v)(\?.*)?$/i.test(link);
+    function videoAdapter(v) {
+      return {
+        getPlayerState: () => (v.paused ? 2 : 1),
+        playVideo: () => { const p = v.play(); if (p && p.catch) p.catch(() => {}); },
+        pauseVideo: () => v.pause(),
+        isMuted: () => v.muted,
+        mute: () => { v.muted = true; },
+        unMute: () => { v.muted = false; },
+        getDuration: () => v.duration || 0,
+        getCurrentTime: () => v.currentTime || 0,
+        seekTo: t => { v.currentTime = t; },
+        destroy: () => { v.pause(); v.removeAttribute('src'); v.load(); v.remove(); }
+      };
+    }
+
     function loadApi() {
       if (apiPromise) return apiPromise;
       apiPromise = new Promise(resolve => {
@@ -356,6 +373,26 @@
       const slot = document.createElement('div');
       slot.id = 'yt-slot';
       frameBox.prepend(slot);
+
+      if (!id && isFile(link)) {   // direct video file: plain <video> with the custom controls
+        lb.classList.add('custom');
+        shareLink = new URL(link, location.href).href;
+        el.seek.value = 0; el.cur.textContent = '0:00'; el.dur.textContent = '0:00';
+        const v = document.createElement('video');
+        v.playsInline = true;
+        v.preload = 'auto';
+        v.style.cssText = 'display:block;width:100%;height:100%;object-fit:contain;background:#000';
+        v.src = link;
+        slot.appendChild(v);
+        player = videoAdapter(v);
+        ready = true;
+        ['play', 'pause', 'volumechange', 'loadedmetadata', 'ended'].forEach(ev =>
+          v.addEventListener(ev, () => { syncIcons(); tick(); }));
+        timer = setInterval(tick, 250);
+        syncIcons();
+        player.playVideo();   // runs inside the click, so the browser allows sound
+        return;
+      }
 
       if (!id) {   // not YouTube: use the host's own player and controls
         lb.classList.remove('custom');
