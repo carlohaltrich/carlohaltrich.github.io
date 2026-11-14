@@ -12,6 +12,7 @@
     --phones-bg: #1d2333;     /* background of the phone block */
     --phone-gap: 4vw;         /* space between the phones */
     --video-dim: 0.2;         /* video dimming: 0 = none, higher = darker (same as the landing page) */
+    --lightbox-dim: 0.75;     /* darkness around the video lightbox: 0 = clear, 1 = black */
   }
   /* ------------------------------------------ */
 
@@ -38,7 +39,7 @@
   }
   .vid-btn:hover, .vid-btn:focus-visible { background: #fff; color: #111; outline: none; }
 
-  .lightbox { position: fixed; inset: 0; z-index: 2000; display: flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.9); }
+  .lightbox { position: fixed; inset: 0; z-index: 2000; display: flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, var(--lightbox-dim)); }
   .lightbox[hidden] { display: none; }
   .lb-frame { position: relative; width: min(90vw, calc(85vh * 16 / 9)); aspect-ratio: 16 / 9; background: #000; }
   .lb-frame iframe { width: 100%; height: 100%; border: 0; }
@@ -58,6 +59,11 @@
   .lb-controls span { font-variant-numeric: tabular-nums; }
   .lb-seek { flex: 1; height: 0.3rem; accent-color: #fff; cursor: pointer; }
   .lb-msg { opacity: 0.85; }
+  .lb-sharewrap { position: relative; display: flex; }
+  .lb-menu { position: absolute; right: 0; bottom: 100%; margin-bottom: 0.6rem; min-width: 11rem; padding: 0.35rem; display: flex; flex-direction: column; border-radius: 0.6rem; background: rgba(22, 22, 26, 0.96); box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.5); }
+  .lb-menu[hidden] { display: none; }
+  .lightbox .lb-menu > * { display: block; padding: 0.6rem 0.8rem; border: 0; border-radius: 0.4rem; background: none; color: #fff; font: inherit; font-size: 0.9rem; text-align: left; text-decoration: none; cursor: pointer; }
+  .lightbox .lb-menu > *:hover { background: rgba(255, 255, 255, 0.14); opacity: 1; }
   .lb-close { position: absolute; top: 1rem; right: 1.75rem; border: 0; background: none; color: #fff; font-size: 2.75rem; line-height: 1; cursor: pointer; }
   .lb-close:hover { opacity: 0.7; }
 
@@ -133,7 +139,7 @@
     </div>
     <div>
       <video muted loop playsinline preload="metadata" src="videos/content/b1-right.mp4"></video>
-      <button class="vid-btn" data-video="https://pub-d0914c454d6f473e86b4046a2477c2ae.r2.dev/GO eBike Short Intro LS.mp4">Swytch Bike</button>
+      <button class="vid-btn" data-video="https://www.youtube.com/watch?v=VIDEO_ID">project two</button>
     </div>
   </section>
 
@@ -221,7 +227,17 @@
         <span class="lb-dur">0:00</span>
         <button class="lb-mute" aria-label="Mute or unmute"></button>
         <span class="lb-msg"></span>
-        <button class="lb-share" aria-label="Copy link"></button>
+        <div class="lb-sharewrap">
+          <button class="lb-share" aria-label="Share"></button>
+          <div class="lb-menu" hidden>
+            <button data-act="copy">Copy link</button>
+            <a data-act="email">Email</a>
+            <a data-act="whatsapp" target="_blank" rel="noopener">WhatsApp</a>
+            <a data-act="x" target="_blank" rel="noopener">X</a>
+            <a data-act="facebook" target="_blank" rel="noopener">Facebook</a>
+            <button data-act="native">More options…</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -425,6 +441,7 @@
 
     function closeLightbox() {
       lb.hidden = true;
+      menu.hidden = true;
       clearInterval(timer);
       ready = false;
       if (player) { try { player.destroy(); } catch (e) {} player = null; }
@@ -443,11 +460,29 @@
       player.seekTo(parseFloat(el.seek.value), true);
       el.cur.textContent = fmt(el.seek.value);
     });
-    el.share.addEventListener('click', () => {
+    const menu = lb.querySelector('.lb-menu');
+    function copyLink() {
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(shareLink).then(() => flash('Link copied'), () => window.prompt('Copy this link', shareLink));
       } else window.prompt('Copy this link', shareLink);
+    }
+    el.share.addEventListener('click', () => {
+      const u = encodeURIComponent(shareLink);
+      menu.querySelector('[data-act="email"]').href = 'mailto:?subject=' + encodeURIComponent('Check out this video') + '&body=' + u;
+      menu.querySelector('[data-act="whatsapp"]').href = 'https://wa.me/?text=' + u;
+      menu.querySelector('[data-act="x"]').href = 'https://twitter.com/intent/tweet?url=' + u;
+      menu.querySelector('[data-act="facebook"]').href = 'https://www.facebook.com/sharer/sharer.php?u=' + u;
+      menu.hidden = !menu.hidden;
     });
+    menu.addEventListener('click', e => {
+      const item = e.target.closest('[data-act]');
+      if (!item) return;
+      if (item.dataset.act === 'copy') copyLink();
+      if (item.dataset.act === 'native') navigator.share({ url: shareLink }).catch(() => {});
+      menu.hidden = true;
+    });
+    if (!navigator.share) menu.querySelector('[data-act="native"]').remove();   // only shown where the system share sheet exists
+    document.addEventListener('click', e => { if (!e.target.closest('.lb-sharewrap')) menu.hidden = true; });
 
     document.querySelectorAll('.vid-btn').forEach(b =>
       b.addEventListener('click', () => openLightbox(b.dataset.video)));
@@ -455,7 +490,7 @@
     lb.addEventListener('click', e => { if (e.target === lb) closeLightbox(); });
     document.addEventListener('keydown', e => {
       if (lb.hidden) return;
-      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'Escape') { if (!menu.hidden) menu.hidden = true; else closeLightbox(); }
       else if (lb.classList.contains('custom') && !['BUTTON', 'INPUT'].includes(document.activeElement.tagName)) {
         if (e.key === ' ') { e.preventDefault(); togglePlay(); }
         else if (e.key === 'm' || e.key === 'M') toggleMute();
