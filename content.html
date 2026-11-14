@@ -379,8 +379,11 @@
       msgTimer = setTimeout(() => { el.msg.textContent = ''; }, 1800);
     }
 
-    async function openLightbox(link) {
+    async function openLightbox(link, slug) {
       const id = parseYouTube(link);
+      // Tidy share link: this page plus a short name, e.g. yoursite.com/content.html#project-one
+      const pageLink = slug ? location.href.split('#')[0] + '#' + slug : '';
+      if (slug) { try { history.replaceState(null, '', '#' + slug); } catch (e) {} }
       lb.hidden = false;
       document.body.style.overflow = 'hidden';
       lb.focus();
@@ -392,7 +395,7 @@
 
       if (!id && isFile(link)) {   // direct video file: plain <video> with the custom controls
         lb.classList.add('custom');
-        shareLink = new URL(link, location.href).href;
+        shareLink = pageLink || new URL(link, location.href).href;
         el.seek.value = 0; el.cur.textContent = '0:00'; el.dur.textContent = '0:00';
         const v = document.createElement('video');
         v.playsInline = true;
@@ -421,7 +424,7 @@
       }
 
       lb.classList.add('custom');
-      shareLink = 'https://youtu.be/' + id;
+      shareLink = pageLink || 'https://youtu.be/' + id;
       ready = false;
       el.seek.value = 0; el.cur.textContent = '0:00'; el.dur.textContent = '0:00';
       syncIcons();
@@ -441,6 +444,7 @@
 
     function closeLightbox() {
       lb.hidden = true;
+      try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
       menu.hidden = true;
       clearInterval(timer);
       ready = false;
@@ -484,8 +488,15 @@
     if (!navigator.share) menu.querySelector('[data-act="native"]').remove();   // only shown where the system share sheet exists
     document.addEventListener('click', e => { if (!e.target.closest('.lb-sharewrap')) menu.hidden = true; });
 
-    document.querySelectorAll('.vid-btn').forEach(b =>
-      b.addEventListener('click', () => openLightbox(b.dataset.video)));
+    // Each button's short name comes from its text (or from an optional data-id), e.g. "project one" -> "project-one"
+    const slugOf = b => (b.dataset.id || b.textContent).trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    const buttons = [...document.querySelectorAll('.vid-btn')];
+    buttons.forEach(b => b.addEventListener('click', () => openLightbox(b.dataset.video, slugOf(b))));
+
+    // Opening a shared link (content.html#project-one) opens that video straight away
+    const wanted = decodeURIComponent(location.hash.slice(1));
+    const target = wanted && buttons.find(b => slugOf(b) === wanted);
+    if (target) openLightbox(target.dataset.video, wanted);
     lb.querySelector('.lb-close').addEventListener('click', closeLightbox);
     lb.addEventListener('click', e => { if (e.target === lb) closeLightbox(); });
     document.addEventListener('keydown', e => {
