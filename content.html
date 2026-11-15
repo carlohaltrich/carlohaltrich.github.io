@@ -13,6 +13,7 @@
     --phone-gap: 4vw;         /* space between the phones */
     --video-dim: 0.2;         /* video dimming: 0 = none, higher = darker (same as the landing page) */
     --lightbox-dim: 0.75;     /* darkness around the video lightbox: 0 = clear, 1 = black */
+    --slide-w: 90cqw;         /* width of each slideshow slide; under 100cqw so neighbours peek in at the sides */
   }
   /* ------------------------------------------ */
 
@@ -72,8 +73,10 @@
   .split > div { flex: 1 1 50%; height: 100%; }
 
   /* Block type: slideshow */
-  .track { display: flex; height: 100%; transition: transform 0.5s ease; }
-  .slide { flex: 0 0 100%; height: 100%; }
+  .track { position: relative; height: 100%; }
+  .slider { container-type: inline-size; }
+  .slide { position: absolute; top: 0; left: calc((100cqw - var(--slide-w)) / 2); width: var(--slide-w); height: 100%; transition: transform 0.5s ease; }
+  .slide:not(.active) { cursor: pointer; }
   .arrow {
     position: absolute; top: 50%; transform: translateY(-50%); z-index: 2;
     width: 3.25rem; height: 3.25rem; border-radius: 50%;
@@ -82,6 +85,7 @@
     transition: background 0.2s ease, color 0.2s ease;
   }
   .arrow:hover, .arrow:focus-visible { background: #fff; color: #111; outline: none; }
+  .arrow:disabled { opacity: 0.3; pointer-events: none; }
   .arrow.prev { left: 1.5rem; }
   .arrow.next { right: 1.5rem; }
 
@@ -147,16 +151,24 @@
   <section class="block slider">
     <div class="track">
       <div class="slide">
-        <video muted loop playsinline preload="metadata" src="videos/content/b2-1.mp4"></video>
+        <video muted loop playsinline preload="metadata" src="videos/content/b2-1.mp4#t=0.1"></video>
         <button class="vid-btn" data-video="https://www.youtube.com/watch?v=VIDEO_ID">project three</button>
       </div>
       <div class="slide">
-        <video muted loop playsinline preload="metadata" src="videos/content/b2-2.mp4"></video>
+        <video muted loop playsinline preload="metadata" src="videos/content/b2-2.mp4#t=0.1"></video>
         <button class="vid-btn" data-video="https://www.youtube.com/watch?v=VIDEO_ID">project four</button>
       </div>
       <div class="slide">
-        <video muted loop playsinline preload="metadata" src="videos/content/b2-3.mp4"></video>
+        <video muted loop playsinline preload="metadata" src="videos/content/b2-3.mp4#t=0.1"></video>
         <button class="vid-btn" data-video="https://www.youtube.com/watch?v=VIDEO_ID">project five</button>
+      </div>
+      <div class="slide">
+        <video muted loop playsinline preload="metadata" src="videos/content/b2-4.mp4#t=0.1"></video>
+        <button class="vid-btn" data-video="https://www.youtube.com/watch?v=VIDEO_ID">project six</button>
+      </div>
+      <div class="slide">
+        <video muted loop playsinline preload="metadata" src="videos/content/b2-5.mp4#t=0.1"></video>
+        <button class="vid-btn" data-video="https://www.youtube.com/watch?v=VIDEO_ID">project seven</button>
       </div>
     </div>
     <button class="arrow prev" aria-label="Previous">&#8249;</button>
@@ -194,9 +206,9 @@
   <!-- 4. Slideshow block -->
   <section class="block slider">
     <div class="track">
-      <div class="slide"><video muted loop playsinline preload="metadata" src="videos/content/b4-1.mp4"></video></div>
-      <div class="slide"><video muted loop playsinline preload="metadata" src="videos/content/b4-2.mp4"></video></div>
-      <div class="slide"><video muted loop playsinline preload="metadata" src="videos/content/b4-3.mp4"></video></div>
+      <div class="slide"><video muted loop playsinline preload="metadata" src="videos/content/b4-1.mp4#t=0.1"></video></div>
+      <div class="slide"><video muted loop playsinline preload="metadata" src="videos/content/b4-2.mp4#t=0.1"></video></div>
+      <div class="slide"><video muted loop playsinline preload="metadata" src="videos/content/b4-3.mp4#t=0.1"></video></div>
     </div>
     <button class="arrow prev" aria-label="Previous">&#8249;</button>
     <button class="arrow next" aria-label="Next">&#8250;</button>
@@ -273,16 +285,28 @@
       const track = s.querySelector('.track');
       const slides = [...s.querySelectorAll('.slide')];
       let i = 0;
-      function show(n) {
-        i = (n + slides.length) % slides.length;
-        slides.forEach((el, k) => el.classList.toggle('active', k === i));
-        slides.forEach((el, k) => { const b = el.querySelector('.vid-btn'); if (b) b.tabIndex = k === i ? 0 : -1; });
-        track.style.transform = 'translateX(' + (-100 * i) + '%)';
-        slides.forEach(el => update(el.querySelector('video')));
+      function show(n, instant) {
+        const len = slides.length;
+        i = ((n % len) + len) % len;          // loops: after the last slide comes the first
+        slides.forEach((el, k) => {
+          let off = ((k - i) % len + len) % len;
+          if (off > len / 2) off -= len;       // position relative to the active slide (-1 = left neighbour, 1 = right)
+          const prev = el.dataset.off === undefined ? off : +el.dataset.off;
+          const noAnim = instant || Math.abs(off - prev) > 1;   // a slide wrapping round jumps instead of sliding across
+          if (noAnim) el.style.transition = 'none';
+          el.style.transform = 'translateX(' + (off * 100) + '%)';
+          el.dataset.off = off;
+          if (noAnim) { void el.offsetWidth; el.style.transition = ''; }
+          el.classList.toggle('active', k === i);
+          const b = el.querySelector('.vid-btn');
+          if (b) b.tabIndex = k === i ? 0 : -1;
+          update(el.querySelector('video'));
+        });
       }
       s.querySelector('.prev').addEventListener('click', () => show(i - 1));
       s.querySelector('.next').addEventListener('click', () => show(i + 1));
-      show(0);
+      slides.forEach((el, k) => el.addEventListener('click', () => { if (k !== i) show(k); }));
+      show(0, true);
     });
 
     // If a browser (e.g. Safari) blocks autoplay, the first click or key press starts everything
