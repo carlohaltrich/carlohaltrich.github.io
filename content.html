@@ -135,20 +135,29 @@
   <section class="block split">
     <div>
       <video muted loop playsinline preload="metadata" src="videos/content/b1-left.mp4"></video>
-      <button class="vid-btn" data-video="https://pub-d0914c454d6f473e86b4046a2477c2ae.r2.dev/VERSION_A_LANDSCAPE_comp.mp4">Swytch Bike</button>
+      <button class="vid-btn" data-video="https://www.youtube.com/watch?v=VIDEO_ID">project one</button>
     </div>
     <div>
       <video muted loop playsinline preload="metadata" src="videos/content/b1-right.mp4"></video>
-      <button class="vid-btn" data-video="https://pub-d0914c454d6f473e86b4046a2477c2ae.r2.dev/GO eBike Short Intro LS.mp4">Swytch Bike</button>
+      <button class="vid-btn" data-video="https://www.youtube.com/watch?v=VIDEO_ID">project two</button>
     </div>
   </section>
 
   <!-- 2. Slideshow block (add or remove .slide divs freely) -->
   <section class="block slider">
     <div class="track">
-      <div class="slide"><video muted loop playsinline preload="metadata" src="videos/content/b2-1.mp4"></video></div>
-      <div class="slide"><video muted loop playsinline preload="metadata" src="videos/content/b2-2.mp4"></video></div>
-      <div class="slide"><video muted loop playsinline preload="metadata" src="videos/content/b2-3.mp4"></video></div>
+      <div class="slide">
+        <video muted loop playsinline preload="metadata" src="videos/content/b2-1.mp4"></video>
+        <button class="vid-btn" data-video="https://www.youtube.com/watch?v=VIDEO_ID">project three</button>
+      </div>
+      <div class="slide">
+        <video muted loop playsinline preload="metadata" src="videos/content/b2-2.mp4"></video>
+        <button class="vid-btn" data-video="https://www.youtube.com/watch?v=VIDEO_ID">project four</button>
+      </div>
+      <div class="slide">
+        <video muted loop playsinline preload="metadata" src="videos/content/b2-3.mp4"></video>
+        <button class="vid-btn" data-video="https://www.youtube.com/watch?v=VIDEO_ID">project five</button>
+      </div>
     </div>
     <button class="arrow prev" aria-label="Previous">&#8249;</button>
     <button class="arrow next" aria-label="Next">&#8250;</button>
@@ -267,6 +276,7 @@
       function show(n) {
         i = (n + slides.length) % slides.length;
         slides.forEach((el, k) => el.classList.toggle('active', k === i));
+        slides.forEach((el, k) => { const b = el.querySelector('.vid-btn'); if (b) b.tabIndex = k === i ? 0 : -1; });
         track.style.transform = 'translateX(' + (-100 * i) + '%)';
         slides.forEach(el => update(el.querySelector('video')));
       }
