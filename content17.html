@@ -13,7 +13,7 @@
     --phone-gap: 4vw;         /* space between the phones */
     --video-dim: 0.2;         /* video dimming: 0 = none, higher = darker (same as the landing page) */
     --lightbox-dim: 0.75;     /* darkness around the video lightbox: 0 = clear, 1 = black */
-    --slide-w: 90cqw;         /* width of each slideshow slide; under 100cqw so neighbours peek in at the sides */
+    --slide-w: 90cqw;         /* width of each slideshow slide; the rest of the width shows the next slide peeking in on the right */
   }
   /* ------------------------------------------ */
 
@@ -75,7 +75,7 @@
   /* Block type: slideshow */
   .track { position: relative; height: 100%; }
   .slider { container-type: inline-size; }
-  .slide { position: absolute; top: 0; left: calc((100cqw - var(--slide-w)) / 2); width: var(--slide-w); height: 100%; transition: transform 0.5s ease; }
+  .slide { position: absolute; top: 0; left: 0; width: var(--slide-w); height: 100%; transition: transform 0.5s ease; }
   .slide:not(.active) { cursor: pointer; }
   .arrow {
     position: absolute; top: 50%; transform: translateY(-50%); z-index: 2;
