@@ -221,9 +221,24 @@
     <button class="arrow next" aria-label="Next">&#8250;</button>
   </section>
 
-  <!-- 5. Single video block -->
-  <section class="block single" data-category="category 5">
-    <video muted loop playsinline preload="metadata" src="videos/content/b5.mp4"></video>
+  <!-- 5. Slideshow block (3 projects, loops) -->
+  <section class="block slider" data-category="category 5">
+    <div class="track">
+      <div class="slide">
+        <video muted loop playsinline preload="metadata" src="videos/content/b5-1.mp4#t=0.1"></video>
+        <button class="vid-btn" data-video="https://www.youtube.com/watch?v=VIDEO_ID">project nine</button>
+      </div>
+      <div class="slide">
+        <video muted loop playsinline preload="metadata" src="videos/content/b5-2.mp4#t=0.1"></video>
+        <button class="vid-btn" data-video="https://www.youtube.com/watch?v=VIDEO_ID">project ten</button>
+      </div>
+      <div class="slide">
+        <video muted loop playsinline preload="metadata" src="videos/content/b5-3.mp4#t=0.1"></video>
+        <button class="vid-btn" data-video="https://www.youtube.com/watch?v=VIDEO_ID">project eleven</button>
+      </div>
+    </div>
+    <button class="arrow prev" aria-label="Previous">&#8249;</button>
+    <button class="arrow next" aria-label="Next">&#8250;</button>
   </section>
 
   <!-- 6. Photo collage block (7 photos, fills the grid exactly) -->
