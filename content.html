@@ -91,7 +91,7 @@
     transition: background 0.2s ease, color 0.2s ease;
   }
   .arrow:hover, .arrow:focus-visible { background: #fff; color: #111; outline: none; }
-  .arrow:disabled { opacity: 0.3; pointer-events: none; }
+  .arrow[hidden] { display: none; }
   .arrow.prev { left: 1.5rem; }
   .arrow.next { right: 1.5rem; }
 
@@ -206,7 +206,7 @@
   </section>
 
   <!-- 4. Slideshow block -->
-  <section class="block slider" data-category="category 4">
+  <section class="block slider" data-category="category 4" data-loop="false">
     <div class="track">
       <div class="slide">
         <video muted loop playsinline preload="metadata" src="videos/content/b4-1.mp4#t=0.1"></video>
@@ -215,14 +215,6 @@
       <div class="slide">
         <video muted loop playsinline preload="metadata" src="videos/content/b4-2.mp4#t=0.1"></video>
         <button class="vid-btn" data-video="https://www.youtube.com/watch?v=VIDEO_ID">project eight</button>
-      </div>
-      <div class="slide">
-        <video muted loop playsinline preload="metadata" src="videos/content/b4-3.mp4#t=0.1"></video>
-        <button class="vid-btn" data-video="https://www.youtube.com/watch?v=VIDEO_ID">project nine</button>
-      </div>
-      <div class="slide">
-        <video muted loop playsinline preload="metadata" src="videos/content/b4-4.mp4#t=0.1"></video>
-        <button class="vid-btn" data-video="https://www.youtube.com/watch?v=VIDEO_ID">project ten</button>
       </div>
     </div>
     <button class="arrow prev" aria-label="Previous">&#8249;</button>
@@ -300,12 +292,16 @@
       const track = s.querySelector('.track');
       const slides = [...s.querySelectorAll('.slide')];
       let i = 0;
+      const loop = s.dataset.loop !== 'false';   // data-loop="false" turns looping off for a slideshow
+      const prevBtn = s.querySelector('.prev'), nextBtn = s.querySelector('.next');
       function show(n, instant) {
         const len = slides.length;
-        i = ((n % len) + len) % len;          // loops: after the last slide comes the first
+        i = loop ? ((n % len) + len) % len : Math.max(0, Math.min(len - 1, n));
+        prevBtn.hidden = !loop && i === 0;                 // without looping, no arrow pointing at a missing slide
+        nextBtn.hidden = !loop && i === len - 1;
         slides.forEach((el, k) => {
-          let off = ((k - i) % len + len) % len;
-          if (off > len / 2) off -= len;       // position relative to the active slide (-1 = left neighbour, 1 = right)
+          let off = loop ? ((k - i) % len + len) % len : k - i;
+          if (loop && off > len / 2) off -= len;   // position relative to the active slide (-1 = left neighbour, 1 = right)
           const prev = el.dataset.off === undefined ? off : +el.dataset.off;
           const noAnim = instant || Math.abs(off - prev) > 1;   // a slide wrapping round jumps instead of sliding across
           if (noAnim) el.style.transition = 'none';
