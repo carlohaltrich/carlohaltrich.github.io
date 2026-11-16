@@ -130,13 +130,18 @@
 
   /* Block type: photo collage (6 x 6 grid, no gaps) */
   .collage { height: var(--collage-h); display: grid; grid-template-columns: repeat(6, 1fr); grid-template-rows: repeat(6, 1fr); }
-  .collage img:nth-child(1) { grid-area: 1 / 1 / 4 / 4; }
-  .collage img:nth-child(2) { grid-area: 1 / 4 / 3 / 7; }
-  .collage img:nth-child(3) { grid-area: 3 / 4 / 5 / 6; }
-  .collage img:nth-child(4) { grid-area: 3 / 6 / 7 / 7; }
-  .collage img:nth-child(5) { grid-area: 4 / 1 / 7 / 3; }
-  .collage img:nth-child(6) { grid-area: 4 / 3 / 7 / 4; }
-  .collage img:nth-child(7) { grid-area: 5 / 4 / 7 / 6; }
+  /* Collage editor (only active at content.html?edit) */
+  .collage .ph { position: relative; min-width: 0; min-height: 0; overflow: hidden; }
+  .collage.editing .ph { cursor: grab; outline: 2px solid #fff; outline-offset: -2px; touch-action: none; user-select: none; }
+  .collage.editing .ph.drag { z-index: 5; opacity: 0.85; cursor: grabbing; }
+  .collage .grip { display: none; position: absolute; right: 0; bottom: 0; width: 1.8rem; height: 1.8rem; background: #fff; cursor: nwse-resize; clip-path: polygon(100% 0, 100% 100%, 0 100%); }
+  .collage.editing .grip { display: block; }
+  .collage .cellmark { z-index: 4; pointer-events: none; }
+  .collage .cellmark.gap { background: repeating-linear-gradient(45deg, rgba(255, 60, 60, 0.8) 0 6px, rgba(255, 60, 60, 0.4) 6px 12px); }
+  .collage .cellmark.over { background: rgba(255, 170, 0, 0.6); }
+  .editbar { position: fixed; left: 50%; bottom: 1rem; transform: translateX(-50%); z-index: 3000; display: flex; align-items: center; gap: 0.9rem; padding: 0.7rem 1rem; border-radius: 0.7rem; background: rgba(22, 22, 26, 0.96); color: #fff; font: 0.9rem "Helvetica Neue", Helvetica, Arial, sans-serif; box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.5); }
+  .editbar button { padding: 0.4rem 0.9rem; border: 1px solid #fff; border-radius: 0.4rem; background: none; color: #fff; font: inherit; cursor: pointer; }
+  .editbar button:hover { background: #fff; color: #111; }
 </style>
 </head>
 <body>
@@ -243,13 +248,13 @@
 
   <!-- 6. Photo collage block (7 photos, fills the grid exactly) -->
   <section class="block collage" data-category="category 6">
-    <img src="photos/p1.jpg" alt="">
-    <img src="photos/p2.jpg" alt="">
-    <img src="photos/p3.jpg" alt="">
-    <img src="photos/p4.jpg" alt="">
-    <img src="photos/p5.jpg" alt="">
-    <img src="photos/p6.jpg" alt="">
-    <img src="photos/p7.jpg" alt="">
+    <div class="ph" style="grid-area: 1 / 1 / 4 / 4"><img src="photos/p1.jpg" alt=""></div>
+    <div class="ph" style="grid-area: 1 / 4 / 3 / 7"><img src="photos/p2.jpg" alt=""></div>
+    <div class="ph" style="grid-area: 3 / 4 / 5 / 6"><img src="photos/p3.jpg" alt=""></div>
+    <div class="ph" style="grid-area: 3 / 6 / 7 / 7"><img src="photos/p4.jpg" alt=""></div>
+    <div class="ph" style="grid-area: 4 / 1 / 7 / 3"><img src="photos/p5.jpg" alt=""></div>
+    <div class="ph" style="grid-area: 4 / 3 / 7 / 4"><img src="photos/p6.jpg" alt=""></div>
+    <div class="ph" style="grid-area: 5 / 4 / 7 / 6"><img src="photos/p7.jpg" alt=""></div>
   </section>
 
   <!-- 7. Single video block -->
@@ -567,6 +572,114 @@
         else if (e.key === 'm' || e.key === 'M') toggleMute();
       }
     });
+
+    // ---- Collage layout editor: open content.html?edit to move and resize photos ----
+    (function () {
+      const grid = document.querySelector('.collage');
+      if (!grid || !/[?&]edit\b/.test(location.search)) return;
+      const COLS = 6, ROWS = 6;                       // the collage grid is 6 x 6 cells
+      const photos = [...grid.querySelectorAll('.ph')];
+      const KEY = 'collageLayout:' + location.pathname;
+
+      const bar = document.createElement('div');
+      bar.className = 'editbar';
+      bar.innerHTML = '<span>Collage editor: drag a photo to move it, drag its corner to resize.</span><b class="st"></b>' +
+        '<button data-a="copy">Copy layout</button><button data-a="reset">Reset</button><button data-a="exit">Exit</button>';
+      document.body.appendChild(bar);
+      const stat = bar.querySelector('.st');
+
+      const apply = (el, s) => { el.style.gridArea = s.r + ' / ' + s.c + ' / ' + (s.r + s.rs) + ' / ' + (s.c + s.cs); };
+      const state = photos.map(el => {
+        const m = el.style.gridArea.split('/').map(n => parseInt(n, 10));
+        return { r: m[0], c: m[1], rs: m[2] - m[0], cs: m[3] - m[1] };
+      });
+      try {   // pick up unsaved work from your last editing session
+        const saved = JSON.parse(localStorage.getItem(KEY));
+        if (saved && saved.length === state.length) saved.forEach((s, k) => { state[k] = s; });
+      } catch (e) {}
+
+      grid.classList.add('editing');
+      photos.forEach((el, k) => {
+        const g = document.createElement('i');
+        g.className = 'grip';
+        el.appendChild(g);
+        el.querySelector('img').draggable = false;
+        apply(el, state[k]);
+      });
+
+      // Shade empty cells (red) and doubled-up cells (orange) so gaps are easy to spot
+      let marks = [];
+      function refresh() {
+        marks.forEach(m => m.remove());
+        marks = [];
+        const used = Array.from({ length: ROWS }, () => new Array(COLS).fill(0));
+        state.forEach(s => {
+          for (let r = s.r; r < s.r + s.rs; r++) for (let c = s.c; c < s.c + s.cs; c++) used[r - 1][c - 1]++;
+        });
+        let gaps = 0, overlaps = 0;
+        for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+          const n = used[r][c];
+          if (n === 1) continue;
+          const m = document.createElement('div');
+          m.className = 'cellmark ' + (n === 0 ? 'gap' : 'over');
+          m.style.gridArea = (r + 1) + ' / ' + (c + 1) + ' / ' + (r + 2) + ' / ' + (c + 2);
+          grid.appendChild(m);
+          marks.push(m);
+          if (n === 0) gaps++; else overlaps++;
+        }
+        stat.textContent = (gaps || overlaps) ? gaps + ' empty, ' + overlaps + ' overlapping' : 'No gaps or overlaps';
+        stat.style.color = (gaps || overlaps) ? '#ffb46b' : '#7dffa8';
+        try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+      }
+      refresh();
+
+      let drag = null;
+      grid.addEventListener('pointerdown', e => {
+        const el = e.target.closest('.ph');
+        if (!el) return;
+        const k = photos.indexOf(el), rect = grid.getBoundingClientRect();
+        const cw = rect.width / COLS, ch = rect.height / ROWS;
+        const cx = Math.floor((e.clientX - rect.left) / cw), cy = Math.floor((e.clientY - rect.top) / ch);
+        drag = { k, el, rect, cw, ch, resize: e.target.classList.contains('grip'), dc: cx - (state[k].c - 1), dr: cy - (state[k].r - 1) };
+        el.classList.add('drag');
+        el.setPointerCapture(e.pointerId);
+        e.preventDefault();
+      });
+      grid.addEventListener('pointermove', e => {
+        if (!drag) return;
+        const s = state[drag.k];
+        const cx = Math.floor((e.clientX - drag.rect.left) / drag.cw), cy = Math.floor((e.clientY - drag.rect.top) / drag.ch);
+        if (drag.resize) {
+          s.cs = Math.max(1, Math.min(COLS - s.c + 1, cx - (s.c - 1) + 1));
+          s.rs = Math.max(1, Math.min(ROWS - s.r + 1, cy - (s.r - 1) + 1));
+        } else {
+          s.c = Math.max(1, Math.min(COLS - s.cs + 1, cx - drag.dc + 1));
+          s.r = Math.max(1, Math.min(ROWS - s.rs + 1, cy - drag.dr + 1));
+        }
+        apply(drag.el, s);
+        refresh();
+      });
+      const endDrag = () => { if (drag) { drag.el.classList.remove('drag'); drag = null; } };
+      grid.addEventListener('pointerup', endDrag);
+      grid.addEventListener('pointercancel', endDrag);
+
+      bar.addEventListener('click', e => {
+        const a = e.target.dataset.a;
+        if (a === 'copy') {
+          const code = photos.map(el =>
+            '    <div class="ph" style="grid-area: ' + el.style.gridArea + '"><img src="' + el.querySelector('img').getAttribute('src') + '" alt=""></div>').join('\n');
+          const done = () => alert('Layout copied. In content.html, replace the photo lines inside the collage block with it.');
+          if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(code).then(done, () => window.prompt('Copy this layout', code));
+          else window.prompt('Copy this layout', code);
+        } else if (a === 'reset') {
+          try { localStorage.removeItem(KEY); } catch (err) {}
+          location.reload();
+        } else if (a === 'exit') {
+          location.href = location.pathname;
+        }
+      });
+      grid.scrollIntoView();
+    })();
   </script>
 </body>
 </html>
