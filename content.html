@@ -610,7 +610,9 @@ el.style.transform = 'translateX(calc(' + (off * 100) + '% + ' + shift + 'cqw))'
 
   const state = photos.map(el => {
     const m = el.style.gridArea.split('/').map(n => parseInt(n, 10));
-    return { r: m[0], c: m[1], rs: m[2] - m[0], cs: m[3] - m[1], x: 50, y: 50 };
+    return { r: m[0], c: m[1], rs: m[2] - m[0], cs: m[3] - m[1], x: parseFloat(el.style.getPropertyValue('--img-x')) || 50,
+y: parseFloat(el.style.getPropertyValue('--img-y')) || 50
+};
   });
 
   try {
@@ -770,11 +772,14 @@ el.style.transform = 'translateX(calc(' + (off * 100) + '% + ' + shift + 'cqw))'
     const action = e.target.dataset.a;
 
     if (action === 'copy') {
-      const code = photos.map(el =>
-        '    <div class="ph" style="grid-area: ' + el.style.gridArea +
-        '"><img src="' + el.querySelector('img').getAttribute('src') +
-        '" alt=""></div>'
-      ).join('\n');
+      const code = photos.map((el, k) => {
+  const img = el.querySelector('img');
+  const s = state[k];
+  return '    <div class="ph" style="grid-area: ' + el.style.gridArea +
+    '; --img-x: ' + s.x + '%; --img-y: ' + s.y + '%">' +
+    '<img src="' + img.getAttribute('src') + '" alt=""></div>';
+}).join('\n');
+
 
       const done = () => alert('Layout copied. In content.html, replace the photo lines inside the collage block with it.');
 
