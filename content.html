@@ -133,7 +133,7 @@
   .ui-nav .plus { width: 11.5cqw; height: 7.6cqw; border-radius: 2cqw; background: #fff; box-shadow: -1cqw 0 #25f4ee, 1cqw 0 #fe2c55; }
 
   /* Block type: photo collage (6 x 6 grid, no gaps) */
-  .collage { height: var(--collage-h); display: grid; grid-template-columns: repeat(6, 1fr); grid-template-rows: repeat(6, 1fr); }
+  .collage { height: var(--collage-h); display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: repeat(6, 1fr); }
   /* Collage editor (only active at content.html?edit) */
   .collage .ph { position: relative; min-width: 0; min-height: 0; overflow: hidden; }
   .collage.editing .ph { cursor: grab; outline: 2px solid #fff; outline-offset: -2px; touch-action: none; user-select: none; }
@@ -591,7 +591,7 @@ el.style.transform = 'translateX(calc(' + (off * 100) + '% + ' + shift + 'cqw))'
 (function () {
   const grid = document.querySelector('.collage');
   if (!grid || !/[?&]edit\b/.test(location.search)) return;
-  const COLS = 6, ROWS = 6;
+  const COLS = 7, ROWS = 6;
   const photos = [...grid.querySelectorAll('.ph')];
   const KEY = 'collageLayout:' + location.pathname;
 
