@@ -1,6 +1,6 @@
 /* ---------- SETTINGS: edit these ---------- */
 const SITE_TITLE = "carlo haltrich";        // <-- the title shown top left on every page
-const HOME_LINK  = "index.html";        // where clicking the title goes
+const HOME_LINK  = "content.html";        // where clicking the title goes
 
 const CONTACT_TEXT = "contact";         // text on the contact button
 const CONTACT_LINK = "mailto:carlo.anghel.haltrich@gmail.com";    // where the contact button goes
