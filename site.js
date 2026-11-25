@@ -36,7 +36,7 @@ const HEADER_PADDING = "1.5rem 2rem";   // space around the header (top/bottom, 
     .site-header a:focus-visible { outline: 3px solid ${TITLE_COLOR}; outline-offset: 4px; }
 
     .site-title {
-      font-size: ${TITLE_SIZE};
+      font-size: 2.5rem;
       font-weight: 200;
       letter-spacing: 0.04em;
     }
@@ -45,7 +45,7 @@ const HEADER_PADDING = "1.5rem 2rem";   // space around the header (top/bottom, 
     .site-contact {
       padding: 0.45rem 1.1rem;
       border: 2px solid ${TITLE_COLOR};
-      font-size: 2.5rem;
+      font-size: 1.5rem;
       letter-spacing: 0.04em;
       text-shadow: none;
       transition: background 0.2s ease, color 0.2s ease;
