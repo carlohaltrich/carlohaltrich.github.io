@@ -42,7 +42,7 @@ const HEADER_PADDING = "1.5rem 2rem";   // space around the header (top/bottom, 
     }
     .site-title:hover { opacity: 0.75; }
 
-    .site-contact {
+        .site-contact {
       padding: 0.45rem 1.1rem;
       border: 2px solid transparent;
       background: transparent;
@@ -61,8 +61,9 @@ const HEADER_PADDING = "1.5rem 2rem";   // space around the header (top/bottom, 
       color: #111;
       text-decoration: none;
     }
-    .site-contact.right { margin-left: auto; };
+    .site-contact.right { margin-left: auto; }
 
+  `;
   document.head.appendChild(style);
 
   const header = document.createElement("header");
