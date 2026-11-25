@@ -45,7 +45,7 @@ const HEADER_PADDING = "1.5rem 2rem";   // space around the header (top/bottom, 
     .site-contact {
       padding: 0.45rem 1.1rem;
       border: 2px solid ${TITLE_COLOR};
-      font-size: 2rem;
+      font-size: 1.5rem;
       font-weight: 100;
       letter-spacing: 0.04em;
       text-shadow: none;
