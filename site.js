@@ -37,7 +37,7 @@ const HEADER_PADDING = "1.5rem 2rem";   // space around the header (top/bottom, 
 
     .site-title {
       font-size: 2.5rem;
-      font-weight: 150;
+      font-weight: 100;
       letter-spacing: 0.04em;
     }
     .site-title:hover { opacity: 0.75; }
@@ -46,7 +46,7 @@ const HEADER_PADDING = "1.5rem 2rem";   // space around the header (top/bottom, 
       padding: 0.45rem 1.1rem;
       border: 2px solid ${TITLE_COLOR};
       font-size: 1.5rem;
-      font-weight: 150;
+      font-weight: 100;
       letter-spacing: 0.04em;
       text-shadow: none;
       transition: background 0.2s ease, color 0.2s ease;
