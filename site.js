@@ -24,7 +24,7 @@ const HEADER_PADDING = "1.5rem 2rem";   // space around the header (top/bottom, 
       display: flex;
       align-items: center;
       gap: 1.75rem;
-      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-family: "obviously-variable", Helvetica, Arial, sans-serif;
       pointer-events: none;   /* header floats over the page without blocking it */
     }
     .site-header a {
