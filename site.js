@@ -61,7 +61,7 @@ const HEADER_PADDING = "1.5rem 2rem";   // space around the header (top/bottom, 
       color: #111;
       text-decoration: none;
     }
-    .site-contact.right { margin-left: auto; }
+    .site-contact.right { margin-left: auto; };
 
   document.head.appendChild(style);
 
