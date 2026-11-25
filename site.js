@@ -3,7 +3,7 @@ const SITE_TITLE = "carlo haltrich";        // <-- the title shown top left on e
 const HOME_LINK  = "index.html";        // where clicking the title goes
 
 const CONTACT_TEXT = "contact";         // text on the contact button
-const CONTACT_LINK = "contact.html";    // where the contact button goes
+const CONTACT_LINK = "mailto:carlo.anghel.haltrich@gmail.com";    // where the contact button goes
 const CONTACT_POSITION = "right";       // "right" = top right corner, "left" = next to the title
 
 const TITLE_COLOR = "#ffffff";
