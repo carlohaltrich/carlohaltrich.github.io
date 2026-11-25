@@ -30,12 +30,12 @@ const HEADER_PADDING = "1.5rem 2rem";   // space around the header (top/bottom, 
     .site-header a {
       pointer-events: auto;   /* but the links themselves are clickable */
       color: ${TITLE_COLOR};
-      text-decoration: none;
       text-shadow: 0 1px 6px rgba(0, 0, 0, 0.45);
     }
     .site-header a:focus-visible { outline: 3px solid ${TITLE_COLOR}; outline-offset: 4px; }
 
     .site-title {
+      text-decoration: none;
       font-size: 2.5rem;
       font-weight: 100;
       letter-spacing: 0.04em;
@@ -46,7 +46,7 @@ const HEADER_PADDING = "1.5rem 2rem";   // space around the header (top/bottom, 
       padding: 0.45rem 1.1rem;
       border: 2px solid transparent;
       background: transparent;
-      font-size: 1rem;
+      font-size: 1.5rem;
       letter-spacing: 0.04em;
       text-decoration: underline;
       text-decoration-thickness: 2px;
