@@ -44,20 +44,25 @@ const HEADER_PADDING = "1.5rem 2rem";   // space around the header (top/bottom, 
 
     .site-contact {
       padding: 0.45rem 1.1rem;
-      border: 2px solid ${TITLE_COLOR};
-      font-size: 1.5rem;
-      font-weight: 100;
+      border: 2px solid transparent;
+      background: transparent;
+      font-size: 1rem;
       letter-spacing: 0.04em;
+      text-decoration: underline;
+      text-decoration-thickness: 2px;
+      text-underline-offset: 0.3em;
       text-shadow: none;
-      transition: background 0.2s ease, color 0.2s ease;
+      transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
     }
     .site-contact:hover,
     .site-contact:focus-visible {
+      border-color: ${TITLE_COLOR};
       background: ${TITLE_COLOR};
       color: #111;
+      text-decoration: none;
     }
     .site-contact.right { margin-left: auto; }
-  `;
+
   document.head.appendChild(style);
 
   const header = document.createElement("header");
